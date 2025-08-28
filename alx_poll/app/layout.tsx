@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '../styles/globals.css';
 import { NavigationMenu } from '@/components/ui/navigation-menu';
+import { AuthProvider } from './auth/context/auth-context';
 import { NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -22,19 +23,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(inter.className, 'min-h-screen bg-background')}>
-        <header className="border-b">
-          <div className="container flex h-16 items-center px-4">
-            <MainNav />
-          </div>
-        </header>
-        <main className="container px-4 py-6">
-          {children}
-        </main>
-        <footer className="border-t py-6">
-          <div className="container px-4 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ALX Poll. All rights reserved.
-          </div>
-        </footer>
+        <AuthProvider>
+          <header className="border-b">
+            <div className="container flex h-16 items-center px-4">
+              <MainNav />
+            </div>
+          </header>
+          <main className="container px-4 py-6">
+            {children}
+          </main>
+          <footer className="border-t py-6">
+            <div className="container px-4 text-center text-sm text-muted-foreground">
+              © {new Date().getFullYear()} ALX Poll. All rights reserved.
+            </div>
+          </footer>
+        </AuthProvider>
       </body>
     </html>
   );

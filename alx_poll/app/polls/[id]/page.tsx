@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AuthWrapper } from '@/components/auth/auth-wrapper';
+import withAuth from '@/app/auth/with-auth';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Mock poll data type
@@ -22,7 +22,7 @@ interface Poll {
   createdBy: string;
 }
 
-export default function PollPage() {
+function PollPage() {
   const { id } = useParams();
   const [poll, setPoll] = useState<Poll | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,75 +115,75 @@ export default function PollPage() {
   }
 
   return (
-    <AuthWrapper>
-      <div className="space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">{poll.question}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!hasVoted ? (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  {poll.options.map((option) => (
-                    <div 
-                      key={option.id}
-                      className={`p-4 border rounded-md cursor-pointer transition-colors ${selectedOption === option.id ? 'bg-primary/10 border-primary' : 'hover:bg-accent'}`}
-                      onClick={() => setSelectedOption(option.id)}
-                    >
-                      {option.text}
-                    </div>
-                  ))}
-                </div>
-                
-                <Button 
-                  onClick={handleVote} 
-                  disabled={!selectedOption || isSubmitting}
-                  className="w-full"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Vote'}
-                </Button>
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">{poll.question}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!hasVoted ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {poll.options.map((option) => (
+                  <div 
+                    key={option.id}
+                    className={`p-4 border rounded-md cursor-pointer transition-colors ${selectedOption === option.id ? 'bg-primary/10 border-primary' : 'hover:bg-accent'}`}
+                    onClick={() => setSelectedOption(option.id)}
+                  >
+                    {option.text}
+                  </div>
+                ))}
               </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-center font-medium text-green-600 dark:text-green-400">
-                  Your vote has been recorded!
-                </p>
-                
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="votes" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="font-medium">Share this poll</h3>
-            <div className="flex space-x-2 mt-2">
-              <Button variant="outline" size="sm">
-                Copy Link
-              </Button>
-              <Button variant="outline" size="sm">
-                QR Code
+              
+              <Button 
+                onClick={handleVote} 
+                disabled={!selectedOption || isSubmitting}
+                className="w-full"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Vote'}
               </Button>
             </div>
-          </div>
-          
-          <div className="text-sm text-muted-foreground">
-            Created by {poll.createdBy} on {poll.createdAt.toLocaleDateString()}
+          ) : (
+            <div className="space-y-4">
+              <p className="text-center font-medium text-green-600 dark:text-green-400">
+                Your vote has been recorded!
+              </p>
+              
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="votes" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="font-medium">Share this poll</h3>
+          <div className="flex space-x-2 mt-2">
+            <Button variant="outline" size="sm">
+              Copy Link
+            </Button>
+            <Button variant="outline" size="sm">
+              QR Code
+            </Button>
           </div>
         </div>
+        
+        <div className="text-sm text-muted-foreground">
+          Created by {poll.createdBy} on {poll.createdAt.toLocaleDateString()}
+        </div>
       </div>
-    </AuthWrapper>
+    </div>
   );
 }
+
+export default withAuth(PollPage);

@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AuthWrapper } from '@/components/auth/auth-wrapper';
+import withAuth from '@/app/auth/with-auth';
 import { generateId } from '@/lib/utils';
 
 const pollOptionSchema = z.object({
@@ -34,7 +34,7 @@ const createPollSchema = z.object({
 
 type CreatePollFormValues = z.infer<typeof createPollSchema>;
 
-export default function CreatePollPage() {
+function CreatePollPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -84,101 +84,101 @@ export default function CreatePollPage() {
   };
 
   return (
-    <AuthWrapper>
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Create a New Poll</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="question"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Question</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="What would you like to ask?" 
-                          className="min-h-24"
-                          disabled={isSubmitting}
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <FormLabel className="text-base">Options</FormLabel>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addOption}
-                      disabled={isSubmitting || fields.length >= 10}
-                    >
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Option
-                    </Button>
-                  </div>
-                  
-                  {fields.map((field, index) => (
-                    <FormField
-                      key={field.id}
-                      control={form.control}
-                      name={`options.${index}.text`}
-                      render={({ field: optionField }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input 
-                                placeholder={`Option ${index + 1}`} 
-                                disabled={isSubmitting}
-                                {...optionField} 
-                              />
-                              {fields.length > 2 && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => remove(index)}
-                                  disabled={isSubmitting}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ))}
+    <div className="max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Create a New Poll</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="question"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Question</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="What would you like to ask?" 
+                        className="min-h-24"
+                        disabled={isSubmitting}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <FormLabel className="text-base">Options</FormLabel>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addOption}
+                    disabled={isSubmitting || fields.length >= 10}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Option
+                  </Button>
                 </div>
                 
-                {form.formState.errors.root && (
-                  <p className="text-sm font-medium text-destructive">
-                    {form.formState.errors.root.message}
-                  </p>
-                )}
-                
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Creating Poll...' : 'Create Poll'}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
-    </AuthWrapper>
+                {fields.map((field, index) => (
+                  <FormField
+                    key={field.id}
+                    control={form.control}
+                    name={`options.${index}.text`}
+                    render={({ field: optionField }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="flex items-center gap-2">
+                            <Input 
+                              placeholder={`Option ${index + 1}`} 
+                              disabled={isSubmitting}
+                              {...optionField} 
+                            />
+                            {fields.length > 2 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => remove(index)}
+                                disabled={isSubmitting}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+              
+              {form.formState.errors.root && (
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.root.message}
+                </p>
+              )}
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating Poll...' : 'Create Poll'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
+
+export default withAuth(CreatePollPage);
