@@ -21,9 +21,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import withAuth from '@/app/auth/with-auth';
 import { generateId } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/app/auth/context/auth-context';
 
 const pollOptionSchema = z.object({
-  id: z.string().optional(),
   text: z.string().min(1, { message: 'Option text is required' }),
 });
 
@@ -36,6 +37,7 @@ type CreatePollFormValues = z.infer<typeof createPollSchema>;
 
 function CreatePollPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreatePollFormValues>({
@@ -43,8 +45,8 @@ function CreatePollPage() {
     defaultValues: {
       question: '',
       options: [
-        { id: generateId(), text: '' },
-        { id: generateId(), text: '' },
+        { text: '' },
+        { text: '' },
       ],
     },
   });
@@ -55,24 +57,30 @@ function CreatePollPage() {
   });
 
   async function onSubmit(data: CreatePollFormValues) {
+    if (!user) {
+      form.setError('root', { message: 'You must be logged in to create a poll.' });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      // TODO: Implement Supabase poll creation
-      console.log('Creating poll:', data);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generate a mock poll ID
-      const pollId = generateId();
-      
-      // Redirect to the newly created poll
-      router.push(`/polls/${pollId}`);
-    } catch (error) {
+      const { error } = await supabase
+        .from('polls')
+        .insert({
+          question: data.question,
+          options: data.options, // Supabase can handle JSON objects
+          creator_id: user.id,
+        });
+
+      if (error) throw error;
+
+      // Redirect to the dashboard on success
+      router.push('/dashboard');
+    } catch (error: any) {
       console.error('Error creating poll:', error);
       form.setError('root', {
-        message: 'Failed to create poll. Please try again.',
+        message: error.message || 'Failed to create poll. Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -80,7 +88,7 @@ function CreatePollPage() {
   }
 
   const addOption = () => {
-    append({ id: generateId(), text: '' });
+    append({ text: '' });
   };
 
   return (
